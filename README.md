@@ -167,14 +167,72 @@ npm start
 
 ---
 
+## Deploying to production (Render + Vercel)
+
+The backend runs on Render, the frontend runs on Vercel. The custom domain `prinsight.kritika.online` points to Vercel; the API lives at `api.prinsight.kritika.online` on Render.
+
+### 1. Deploy the backend on Render
+
+1. Go to [render.com](https://render.com) → New → Web Service
+2. Connect your GitHub repo
+3. Render will pick up `render.yaml` automatically — it sets the build and start commands
+4. Add these environment variables manually in the Render dashboard (they're marked `sync: false` in the config so they don't end up in the repo):
+   - `GITHUB_TOKEN`
+   - `GITHUB_WEBHOOK_SECRET`
+   - `GEMINI_API_KEY`
+5. Once deployed, go to Settings → Custom Domains → add `api.prinsight.kritika.online`
+6. Render gives you a CNAME value — add it to your DNS (wherever `kritika.online` is managed)
+
+### 2. Deploy the frontend on Vercel
+
+1. Go to [vercel.com](https://vercel.com) → New Project → import your GitHub repo
+2. Vercel picks up `vercel.json` — it builds `client/` and serves `client/dist`
+3. Add this environment variable in the Vercel dashboard:
+   - `VITE_API_URL` → `https://api.prinsight.kritika.online`
+4. Go to Settings → Domains → add `prinsight.kritika.online`
+5. Vercel gives you a CNAME — add it to your DNS
+
+### 3. DNS records
+
+Add these two records wherever `kritika.online` is hosted (Namecheap, Cloudflare, GoDaddy, etc.):
+
+| Type | Name | Value |
+|---|---|---|
+| CNAME | `prinsight` | given by Vercel |
+| CNAME | `api.prinsight` | given by Render |
+
+DNS can take a few minutes to an hour to propagate.
+
+### 4. Verify
+
+```bash
+curl https://api.prinsight.kritika.online/health
+# should return: {"status":"ok","service":"PRInsight","version":"1.0.0"}
+```
+
+Then open https://prinsight.kritika.online and paste a PR URL.
+
+> **Note:** Render's free tier spins down after 15 minutes of inactivity. The first request after sleep takes ~30 seconds. Upgrade to a paid instance if you need it always-on.
+
+---
+
 ## Environment variables
 
-| Variable | Used by | What it's for |
-|---|---|---|
-| `GITHUB_TOKEN` | Webhook, Web app | Reads diffs and posts comments. Needs `repo` + `issues` scope. |
-| `GITHUB_WEBHOOK_SECRET` | Webhook | Validates that events actually came from GitHub. |
-| `GEMINI_API_KEY` | Everything | The AI that does the actual reviewing. |
-| `PORT` | Webhook, Web app | Defaults to 3000. |
+**Backend (.env or Render dashboard)**
+
+| Variable | What it's for |
+|---|---|
+| `GITHUB_TOKEN` | Reads diffs and posts comments. Needs `repo` + `issues` scope. |
+| `GITHUB_WEBHOOK_SECRET` | Validates that events actually came from GitHub. |
+| `GEMINI_API_KEY` | The AI that does the reviewing. |
+| `FRONTEND_URL` | Your Vercel URL — used for the CORS allow-origin header. |
+| `PORT` | Defaults to 3000. |
+
+**Frontend (client/.env or Vercel dashboard)**
+
+| Variable | What it's for |
+|---|---|
+| `VITE_API_URL` | Points the React app at your Render backend. Empty in local dev. |
 
 ---
 
@@ -183,25 +241,29 @@ npm start
 ```
 PRInsight/
 ├── .github/workflows/
-│   └── prinsight.yml       # the GitHub Action
-├── client/                 # React frontend
-│   └── src/
-│       ├── App.jsx
-│       └── components/
-│           ├── PRInput.jsx         # URL input + validation
-│           ├── Summary.jsx         # PR info + AI summary
-│           ├── ReviewComments.jsx  # findings grouped by file
-│           └── Loader.jsx
-├── src/
-│   ├── index.js            # Express entry point
-│   ├── webhook.js          # validates GitHub signature, routes events
-│   ├── github.js           # Octokit wrapper
-│   ├── diffParser.js       # turns raw diffs into something the AI can use
-│   ├── gemini.js           # two prompts: summary + review
-│   ├── reviewer.js         # pulls everything together
+│   └── prinsight.yml       # GitHub Action — auto-reviews PRs in CI
+├── client/                 # React frontend (deployed to Vercel)
+│   ├── src/
+│   │   ├── App.jsx
+│   │   └── components/
+│   │       ├── PRInput.jsx
+│   │       ├── Summary.jsx
+│   │       ├── ReviewComments.jsx
+│   │       └── Loader.jsx
+│   ├── .env.example
+│   └── vite.config.js      # proxies /api to :3000 in local dev
+├── src/                    # Express backend (deployed to Render)
+│   ├── index.js
+│   ├── webhook.js
+│   ├── github.js
+│   ├── diffParser.js
+│   ├── gemini.js
+│   ├── reviewer.js
 │   ├── action.js           # entry point for GitHub Action runs
 │   └── routes/
-│       └── analyze.js      # POST /api/analyze for the web app
+│       └── analyze.js      # POST /api/analyze — used by the web app
+├── render.yaml             # Render deployment config
+├── vercel.json             # Vercel deployment config
 ├── .env.example
 └── package.json
 ```
@@ -214,7 +276,7 @@ PRInsight/
 - **React + Vite** — web UI
 - **Gemini 1.5 Flash** — the AI model doing the reviewing
 - **Octokit** — GitHub API client
-- **HMAC-SHA256** — webhook signature verification so random people can't trigger reviews
+- **HMAC-SHA256** — webhook signature verification
 
 ---
 
