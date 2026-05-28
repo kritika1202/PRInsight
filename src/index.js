@@ -25,10 +25,6 @@ app.use(
   })
 );
 
-// Serve built React client in production (when not using Vercel for frontend)
-const clientDist = path.join(__dirname, '..', 'client', 'dist');
-app.use(express.static(clientDist));
-
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'PRInsight', version: '1.0.0' });
 });
@@ -36,10 +32,16 @@ app.get('/health', (_req, res) => {
 app.post('/webhook', handleWebhook);
 app.use('/api', analyzeRouter);
 
-// Fallback: serve React app for any non-API route
-app.get('*', (_req, res) => {
-  res.sendFile(path.join(clientDist, 'index.html'));
-});
+// Serve built React client only when client/dist exists (self-hosted / local prod)
+// On Render, the frontend is served by Vercel so this is skipped
+const fs = require('fs');
+const clientDist = path.join(__dirname, '..', 'client', 'dist');
+if (fs.existsSync(clientDist)) {
+  app.use(express.static(clientDist));
+  app.get('*', (_req, res) => {
+    res.sendFile(path.join(clientDist, 'index.html'));
+  });
+}
 
 app.listen(PORT, () => {
   console.log(`[PRInsight] Server running on port ${PORT}`);
