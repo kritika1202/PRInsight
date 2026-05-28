@@ -5,8 +5,7 @@ export default function Summary({ summary, pr }) {
   return (
     <div className="summary-card">
       <div className="summary-header">
-        <span className="summary-icon">📋</span>
-        <h2 className="summary-title">PR Summary</h2>
+        <h2 className="summary-title">Summary</h2>
       </div>
 
       <div className="pr-meta">

@@ -47,11 +47,10 @@ export default function ReviewComments({ comments }) {
     return (
       <div className="review-card">
         <div className="review-header">
-          <span className="review-icon">✅</span>
-          <h2 className="review-title">Code Review</h2>
+          <h2 className="review-title">Review</h2>
         </div>
         <div className="no-issues">
-          <p>No significant issues found in this PR. Looks good! 🎉</p>
+          <p>Nothing flagged — the diff looks fine.</p>
         </div>
       </div>
     );
@@ -69,8 +68,7 @@ export default function ReviewComments({ comments }) {
   return (
     <div className="review-card">
       <div className="review-header">
-        <span className="review-icon">🧐</span>
-        <h2 className="review-title">Code Review</h2>
+        <h2 className="review-title">Review</h2>
         <div className="review-totals">
           {criticalTotal > 0 && (
             <span className="badge badge--critical">{criticalTotal} critical</span>

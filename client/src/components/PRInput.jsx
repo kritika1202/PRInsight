@@ -61,7 +61,7 @@ export default function PRInput({ onAnalyze, loading }) {
       </form>
 
       <p className="input-hint">
-        Works with any <strong>public</strong> GitHub pull request. Paste the full URL above.
+        Paste the full PR URL — e.g. <code>https://github.com/vercel/next.js/pull/1234</code>
       </p>
     </div>
   );

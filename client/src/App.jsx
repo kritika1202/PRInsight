@@ -40,14 +40,9 @@ export default function App() {
             <h1 className="logo-title">PRInsight</h1>
           </div>
           <p className="header-sub">
-            Paste any public GitHub Pull Request URL and get an instant AI-powered
-            code review — bugs, time complexity, security issues, and a full PR summary.
+            Paste a GitHub PR link and get a code review back — what changed, what looks off,
+            and which lines need a second look.
           </p>
-          <div className="badges">
-            <span className="badge">⚡ Powered by Gemini</span>
-            <span className="badge">🐙 GitHub API</span>
-            <span className="badge">🔒 No data stored</span>
-          </div>
         </div>
       </header>
 
@@ -72,10 +67,7 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <p>
-          Built with <strong>Express.js</strong> · <strong>Gemini 1.5 Flash</strong> · <strong>GitHub API</strong>
-        </p>
-        <p className="footer-sub">Only analyzes public repositories</p>
+        <p>Express.js · Gemini 1.5 Flash · GitHub API · Works on public repos only</p>
       </footer>
     </div>
   );

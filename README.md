@@ -1,62 +1,37 @@
 # PRInsight
 
-> AI-powered GitHub Pull Request reviewer — auto-posts summaries and inline code review comments using **Gemini API**.
+I got tired of waiting for code reviews, so I built this. It hooks into GitHub, reads your PR diff, sends it to Gemini, and posts the review comments back — same as a human reviewer would, just faster.
 
-PRInsight works in **three modes**:
+It can run three ways depending on what you need:
 
-| Mode | How | Best for |
-|---|---|---|
-| **GitHub Action** | Workflow in your repo — runs on GitHub's servers | Any repo, zero infra needed |
-| **Webhook Server** | Express.js server receives GitHub events | Self-hosted / always-on setups |
-| **Web UI** | Paste any PR URL, get instant analysis in browser | Demos, one-off reviews |
+- **GitHub Action** — drop a workflow file in your repo and forget about it. Every PR gets reviewed automatically.
+- **Webhook server** — run it on your own machine or a VPS and point GitHub at it.
+- **Web app** — paste a PR link and read the analysis right in the browser. Good for one-off reviews.
 
 ---
 
-## How It Works
+## What it actually does
 
-```
-PR opened on GitHub
-        │
-        ▼
-Fetch raw unified diff  (GitHub API / Octokit)
-        │
-        ▼
-Parse diff → file / hunk / line objects  (diffParser.js)
-        │
-        ├──▶  Gemini: PR Summary          (Purpose · Key Changes · Impact)
-        │
-        └──▶  Gemini: Inline Review       (JSON → path · line · severity · comment)
-                        │
-                        ▼
-             Post summary comment on PR
-             Post inline review comments (line-level)
-             Post collapsible Review Digest
-```
+When a PR is opened, PRInsight:
+
+1. Fetches the raw diff from GitHub
+2. Filters out lockfiles, images, and generated files
+3. Sends the diff to Gemini with two prompts — one for a summary, one for a code review
+4. Posts the summary as a PR comment
+5. Posts inline review comments on the specific lines with issues
+6. Adds a collapsible digest at the bottom so you can copy everything at once
+
+Each review comment is marked `[critical]` (actual bug, security issue, logic error) or `[suggestion]` (could be better, but won't break anything).
+
+If the diff is too large (>2000 lines) or has no source files, it posts a comment explaining why it skipped instead of silently doing nothing.
 
 ---
 
-## Features
+## GitHub Action setup
 
-- **Zero-touch auto-review** — triggers on every new PR automatically
-- **On-demand re-review** — comment `prinsight-review` on any PR to re-run
-- **PR Summary** — structured AI summary: Purpose, Key Changes, and Impact
-- **Inline code review** — flags bugs, O(n²) complexity, security issues, missing null-checks
-- **Severity labels** — every comment tagged `[critical]` or `[suggestion]`
-- **Review Digest** — collapsible copy-paste block of all findings
-- **Skip transparency** — oversized diffs or binary-only PRs get a clear skip reason comment
-- **Web UI** — paste any public PR URL for instant browser-based analysis
+This is the easiest way. No server, no configuration beyond one secret.
 
----
-
-## Mode 1 — GitHub Action (Recommended)
-
-No server, no webhook registration. PRInsight runs directly inside GitHub Actions on every PR.
-
-### Setup (2 steps)
-
-**Step 1 — Add the workflow file to your repo**
-
-Copy `.github/workflows/prinsight.yml` into your repository:
+**Step 1** — copy `.github/workflows/prinsight.yml` into your repo. The file is already in this project, so if you're using PRInsight itself, it's already there.
 
 ```yaml
 name: PRInsight AI Review
@@ -67,7 +42,6 @@ on:
 
 jobs:
   review:
-    name: AI Code Review
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -88,33 +62,28 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
 ```
 
-**Step 2 — Add your Gemini API key as a repository secret**
+**Step 2** — add `GEMINI_API_KEY` as a repository secret.
 
-1. Go to your repo → **Settings** → **Secrets and variables** → **Actions**
-2. Click **New repository secret**
-3. Name: `GEMINI_API_KEY`
-4. Value: your key from [Google AI Studio](https://aistudio.google.com)
+Go to your repo → Settings → Secrets and variables → Actions → New repository secret. Get the key from [Google AI Studio](https://aistudio.google.com) (free).
 
-`GITHUB_TOKEN` is provided automatically by GitHub — no action needed.
+`GITHUB_TOKEN` is already available in every Action run — GitHub injects it automatically.
 
-### What happens next
-
-Open any Pull Request → the Action triggers → PRInsight posts a summary comment and inline review comments directly on the PR.
+That's it. Open a PR and it'll review it.
 
 ---
 
-## Mode 2 — Webhook Server
+## Webhook server setup
 
-Run PRInsight as a persistent Express.js server that listens for GitHub webhook events.
+Use this if you want one server handling multiple repos, or if you don't want to add a workflow file to every project.
 
-### Prerequisites
+**What you need:**
 
 - Node.js 18+
-- A [Google AI Studio](https://aistudio.google.com) API key
-- A GitHub Personal Access Token (PAT) with `repo`, `pull_requests`, `issues` scopes
-- A public URL (use [ngrok](https://ngrok.com) for local development)
+- A Gemini API key from [Google AI Studio](https://aistudio.google.com)
+- A GitHub personal access token (needs `repo` and `issues` scopes)
+- A public URL — use [ngrok](https://ngrok.com) if you're running locally
 
-### Installation
+**Install:**
 
 ```bash
 git clone https://github.com/<your-username>/PRInsight.git
@@ -123,162 +92,129 @@ npm install
 cp .env.example .env
 ```
 
-Fill in `.env`:
+Edit `.env`:
 
-```env
-GITHUB_TOKEN=ghp_your_token_here
-GITHUB_WEBHOOK_SECRET=your_webhook_secret_here
-GEMINI_API_KEY=your_gemini_api_key_here
+```
+GITHUB_TOKEN=ghp_xxxx
+GITHUB_WEBHOOK_SECRET=pick_any_string_here
+GEMINI_API_KEY=your_key_here
 PORT=3000
 ```
 
-### Register the GitHub Webhook
-
-1. Go to your repository → **Settings** → **Webhooks** → **Add webhook**
-2. **Payload URL**: `https://<your-server>/webhook`
-3. **Content type**: `application/json`
-4. **Secret**: same value as `GITHUB_WEBHOOK_SECRET` in `.env`
-5. **Events**: select **Pull requests** and **Issue comments**
-
-### Run the server
+**Start the server:**
 
 ```bash
-# Development — auto-restarts on file changes
-npm run dev
-
-# Production
-npm start
+npm run dev        # restarts on file changes
+npm start          # production
 ```
 
-For local development, expose the server with ngrok:
+**Expose it to GitHub (local dev):**
 
 ```bash
 ngrok http 3000
-# Use the printed https URL as the Payload URL in the webhook settings above
+# copy the https://xxxx.ngrok.io URL
 ```
 
-Verify the server is running:
+**Register the webhook on GitHub:**
+
+Go to your repo → Settings → Webhooks → Add webhook.
+
+- Payload URL: `https://xxxx.ngrok.io/webhook`
+- Content type: `application/json`
+- Secret: whatever you set as `GITHUB_WEBHOOK_SECRET`
+- Events: check "Pull requests" and "Issue comments"
+
+Check it's running:
 
 ```bash
 curl http://localhost:3000/health
-# → {"status":"ok","service":"PRInsight","version":"1.0.0"}
 ```
 
-### Manual re-trigger
+**Re-trigger a review manually:**
 
-Post a comment on any PR with:
+Post a comment on any PR with just:
 
 ```
 prinsight-review
 ```
 
-PRInsight re-runs the full review cycle (summary + inline comments) on the current diff.
+It'll re-run on the current state of the diff. Useful after you've pushed fixes and want a fresh pass.
 
 ---
 
-## Mode 3 — Web UI
+## Web app
 
-A React interface where anyone can paste a public GitHub PR URL and get an instant AI-powered analysis in the browser — no setup, no tokens needed on the user's side.
-
-### Run locally
+Good for reviewing someone else's PR, or checking a one-off thing without setting up a webhook.
 
 ```bash
-# Install all dependencies (root + client)
-npm run setup
+npm run setup        # installs root + client dependencies
 
-# Terminal 1 — backend API server
-npm run dev
+# in one terminal
+npm run dev          # API server on port 3000
 
-# Terminal 2 — React dev server
-npm run dev:client
+# in another terminal
+npm run dev:client   # React app on port 5173
 ```
 
-Open **http://localhost:5173**, paste a PR URL, and click **Analyze PR**.
+Open http://localhost:5173, paste a GitHub PR URL, click Analyze.
 
-### Build for production
+For production, build the client first and then start the server — it serves everything from one port:
 
 ```bash
-npm run build:client   # outputs to client/dist/
-npm start              # Express serves the built UI + API from port 3000
+npm run build:client
+npm start
 ```
-
-In production, the Express server serves the built React files as static assets — a single process handles both the UI and the `/api/analyze` endpoint.
 
 ---
 
-## Environment Variables
+## Environment variables
 
-| Variable | Required for | Description |
+| Variable | Used by | What it's for |
 |---|---|---|
-| `GITHUB_TOKEN` | Webhook · Web UI | PAT with `repo`, `pull_requests`, `issues` scopes |
-| `GITHUB_WEBHOOK_SECRET` | Webhook | Secret for HMAC-SHA256 signature validation |
-| `GEMINI_API_KEY` | All modes | API key from [Google AI Studio](https://aistudio.google.com) |
-| `PORT` | Webhook · Web UI | Server port (default: `3000`) |
-
-> The GitHub Action uses `secrets.GITHUB_TOKEN` (auto-provided) and `secrets.GEMINI_API_KEY` (you add this once per repo).
+| `GITHUB_TOKEN` | Webhook, Web app | Reads diffs and posts comments. Needs `repo` + `issues` scope. |
+| `GITHUB_WEBHOOK_SECRET` | Webhook | Validates that events actually came from GitHub. |
+| `GEMINI_API_KEY` | Everything | The AI that does the actual reviewing. |
+| `PORT` | Webhook, Web app | Defaults to 3000. |
 
 ---
 
-## Project Structure
+## Project layout
 
 ```
 PRInsight/
-├── .github/
-│   └── workflows/
-│       └── prinsight.yml     # GitHub Actions workflow
-├── client/                   # React + Vite web UI
-│   ├── src/
-│   │   ├── App.jsx
-│   │   ├── components/
-│   │   │   ├── PRInput.jsx   # URL input with validation
-│   │   │   ├── Summary.jsx   # PR metadata + AI summary
-│   │   │   ├── ReviewComments.jsx  # Inline findings grouped by file
-│   │   │   └── Loader.jsx    # Animated analysis progress
-│   │   └── main.jsx
-│   ├── vite.config.js        # Dev proxy: /api → localhost:3000
-│   └── package.json
+├── .github/workflows/
+│   └── prinsight.yml       # the GitHub Action
+├── client/                 # React frontend
+│   └── src/
+│       ├── App.jsx
+│       └── components/
+│           ├── PRInput.jsx         # URL input + validation
+│           ├── Summary.jsx         # PR info + AI summary
+│           ├── ReviewComments.jsx  # findings grouped by file
+│           └── Loader.jsx
 ├── src/
-│   ├── index.js              # Express server entry point
-│   ├── webhook.js            # HMAC validation + event routing
-│   ├── github.js             # Octokit: fetch diffs, post comments/reviews
-│   ├── diffParser.js         # Unified diff → structured file/hunk/line objects
-│   ├── gemini.js             # Gemini API: summary + JSON review generation
-│   ├── reviewer.js           # Orchestration: diff → AI → GitHub PR comments
-│   ├── action.js             # Entry point for GitHub Actions runs
+│   ├── index.js            # Express entry point
+│   ├── webhook.js          # validates GitHub signature, routes events
+│   ├── github.js           # Octokit wrapper
+│   ├── diffParser.js       # turns raw diffs into something the AI can use
+│   ├── gemini.js           # two prompts: summary + review
+│   ├── reviewer.js         # pulls everything together
+│   ├── action.js           # entry point for GitHub Action runs
 │   └── routes/
-│       └── analyze.js        # POST /api/analyze — powers the Web UI
+│       └── analyze.js      # POST /api/analyze for the web app
 ├── .env.example
-├── .gitignore
 └── package.json
 ```
 
 ---
 
-## Tech Stack
+## Tech
 
-| Layer | Technology |
-|---|---|
-| Server | Express.js |
-| Frontend | React 18 + Vite |
-| GitHub API | `@octokit/rest` |
-| AI Model | Gemini 1.5 Flash (`@google/generative-ai`) |
-| CI/CD | GitHub Actions |
-| Security | HMAC-SHA256 webhook signature verification |
-
----
-
-## Choosing a Mode
-
-```
-Want zero infra and auto-reviews on every PR?
-  → Use the GitHub Action
-
-Have a server and want to support multiple repos from one place?
-  → Use the Webhook Server
-
-Want to review a one-off PR without any setup?
-  → Use the Web UI
-```
+- **Express.js** — webhook server and API
+- **React + Vite** — web UI
+- **Gemini 1.5 Flash** — the AI model doing the reviewing
+- **Octokit** — GitHub API client
+- **HMAC-SHA256** — webhook signature verification so random people can't trigger reviews
 
 ---
 

@@ -47,22 +47,6 @@
   margin-bottom: 20px;
 }
 
-.badges {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.badge {
-  background: rgba(88, 166, 255, 0.12);
-  border: 1px solid rgba(88, 166, 255, 0.25);
-  color: #58a6ff;
-  font-size: 0.78rem;
-  font-weight: 500;
-  padding: 4px 12px;
-  border-radius: 20px;
-}
 
 /* ─── Main ───────────────────────────────────────────────────────────────── */
 .main {
@@ -107,8 +91,3 @@
   background: #fff;
 }
 
-.footer-sub {
-  margin-top: 4px;
-  color: #8c959f;
-  font-size: 0.78rem;
-}
