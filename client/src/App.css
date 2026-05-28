@@ -1,0 +1,114 @@
+/* ─── Layout ─────────────────────────────────────────────────────────────── */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ─────────────────────────────────────────────────────────────── */
+.header {
+  background: linear-gradient(135deg, #0d1117 0%, #161b22 60%, #1f2937 100%);
+  color: #e6edf3;
+  padding: 48px 24px 52px;
+  text-align: center;
+}
+
+.header-inner {
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.logo-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.logo-icon {
+  font-size: 2.4rem;
+}
+
+.logo-title {
+  font-size: 2.4rem;
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  background: linear-gradient(90deg, #58a6ff, #79c0ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.header-sub {
+  font-size: 1.05rem;
+  color: #8b949e;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.badges {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  background: rgba(88, 166, 255, 0.12);
+  border: 1px solid rgba(88, 166, 255, 0.25);
+  color: #58a6ff;
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 20px;
+}
+
+/* ─── Main ───────────────────────────────────────────────────────────────── */
+.main {
+  flex: 1;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 20px 48px;
+}
+
+/* ─── Error ──────────────────────────────────────────────────────────────── */
+.error-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #fff0ee;
+  border: 1px solid #ffcdd2;
+  color: #cf222e;
+  border-radius: 8px;
+  padding: 14px 18px;
+  font-size: 0.95rem;
+  margin-top: 20px;
+}
+
+.error-icon { font-size: 1.1rem; }
+
+/* ─── Results ────────────────────────────────────────────────────────────── */
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 28px;
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+.footer {
+  text-align: center;
+  padding: 24px;
+  color: #57606a;
+  font-size: 0.85rem;
+  border-top: 1px solid #d0d7de;
+  background: #fff;
+}
+
+.footer-sub {
+  margin-top: 4px;
+  color: #8c959f;
+  font-size: 0.78rem;
+}

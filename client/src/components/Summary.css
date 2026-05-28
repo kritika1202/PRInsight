@@ -1,0 +1,136 @@
+.summary-card {
+  background: #fff;
+  border: 1px solid #d0d7de;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 20px;
+  background: #f6f8fa;
+  border-bottom: 1px solid #d0d7de;
+}
+
+.summary-icon { font-size: 1.2rem; }
+
+.summary-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #24292f;
+}
+
+/* PR metadata row */
+.pr-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  background: #fff;
+  border-bottom: 1px solid #eaeef2;
+  flex-wrap: wrap;
+}
+
+.avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #d0d7de;
+  flex-shrink: 0;
+}
+
+.pr-meta-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.pr-link {
+  font-weight: 600;
+  font-size: 0.93rem;
+  color: #0969da;
+  text-decoration: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pr-link:hover { text-decoration: underline; }
+
+.pr-author {
+  font-size: 0.8rem;
+  color: #57606a;
+}
+
+.pr-stats {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.stat {
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 20px;
+}
+
+.stat--files {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  color: #57606a;
+}
+
+.stat--add {
+  background: #dafbe1;
+  color: #116329;
+  border: 1px solid #b7e8c0;
+}
+
+.stat--del {
+  background: #fff0ee;
+  color: #cf222e;
+  border: 1px solid #ffd5d0;
+}
+
+/* Markdown content */
+.summary-body {
+  padding: 20px;
+  font-size: 0.93rem;
+  line-height: 1.7;
+  color: #24292f;
+}
+
+.summary-body p { margin-bottom: 12px; }
+.summary-body p:last-child { margin-bottom: 0; }
+
+.summary-body strong { font-weight: 600; color: #24292f; }
+
+.summary-body ul, .summary-body ol {
+  padding-left: 20px;
+  margin-bottom: 12px;
+}
+
+.summary-body li { margin-bottom: 4px; }
+
+.summary-body h1, .summary-body h2, .summary-body h3 {
+  font-size: 0.97rem;
+  font-weight: 600;
+  margin: 16px 0 6px;
+  color: #24292f;
+}
+
+.summary-body code {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 0.85em;
+  font-family: 'SFMono-Regular', Consolas, monospace;
+}

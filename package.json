@@ -5,7 +5,10 @@
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js"
+    "dev": "nodemon src/index.js",
+    "dev:client": "cd client && npm run dev",
+    "build:client": "cd client && npm install && npm run build",
+    "setup": "npm install && cd client && npm install"
   },
   "keywords": ["github", "pull-request", "code-review", "gemini", "ai", "webhook"],
   "author": "Akash Sharma",
