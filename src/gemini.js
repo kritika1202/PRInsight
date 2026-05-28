@@ -7,7 +7,7 @@ function getClient() {
 }
 
 function getModel() {
-  return getClient().getGenerativeModel({ model: 'gemini-1.5-flash' });
+  return getClient().getGenerativeModel({ model: 'gemini-2.0-flash' });
 }
 
 async function generateSummary(prTitle, prBody, formattedDiff) {
