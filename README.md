@@ -10,6 +10,19 @@ It can run three ways depending on what you need:
 
 ---
 
+## Screenshots
+
+**Web UI — analyzing a PR**
+![PRInsight analyzing a pull request](docs/screenshots/home.png)
+
+**Web UI — summary and review results**
+![PRInsight showing PR summary and inline review comments](docs/screenshots/review-comments.png)
+
+**GitHub — inline comments posted directly on the PR**
+![Inline review comments posted by PRInsight on GitHub](docs/screenshots/summary.png)
+
+---
+
 ## What it actually does
 
 When a PR is opened, PRInsight:
