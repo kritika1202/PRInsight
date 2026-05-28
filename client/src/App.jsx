@@ -15,8 +15,12 @@ export default function App() {
     setError(null);
     setResult(null);
 
+    // In production VITE_API_URL points to the Render backend.
+    // In local dev it's empty and Vite's proxy handles /api → localhost:3000.
+    const base = import.meta.env.VITE_API_URL || '';
+
     try {
-      const res = await fetch('/api/analyze', {
+      const res = await fetch(`${base}/api/analyze`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prUrl }),
