@@ -288,7 +288,6 @@ PRInsight/
 - **Express.js** — webhook server and API
 - **React + Vite** — web UI
 - **Gemini 2.5 Flash** — the AI model doing the reviewing
-- **Octokit** — GitHub API client
 - **HMAC-SHA256** — webhook signature verification
 
 ---
