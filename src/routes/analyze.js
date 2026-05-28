@@ -33,6 +33,13 @@ router.post('/analyze', async (req, res) => {
       getPRDetails(owner, repo, pullNumber),
     ]);
 
+    const diffLines = rawDiff.split('\n').length;
+    if (diffLines > 2000) {
+      return res.status(400).json({
+        error: `This PR has ${diffLines.toLocaleString()} diff lines which is too large to analyze (limit: 2,000). Try a smaller PR.`,
+      });
+    }
+
     const allFiles = parseDiff(rawDiff);
     const reviewableFiles = filterReviewableFiles(allFiles);
 
