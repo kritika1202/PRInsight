@@ -71,7 +71,7 @@ export default function App() {
       </main>
 
       <footer className="footer">
-        <p>Express.js · Gemini 1.5 Flash · GitHub API · Works on public repos only</p>
+        <p>Express.js · Gemini 2.5 Flash · GitHub API · Works on public repos only</p>
       </footer>
     </div>
   );
